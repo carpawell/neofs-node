@@ -44,7 +44,7 @@ var getEpochCmd = &cobra.Command{
 		key, err := getKey()
 		exitOnErr(cmd, err)
 
-		cli, err := getSDKClient(key)
+		cli, err := getAPIClient(key)
 		exitOnErr(cmd, err)
 
 		netInfo, err := cli.NetworkInfo(context.Background(), globalCallOptions()...)
@@ -62,7 +62,7 @@ var localNodeInfoCmd = &cobra.Command{
 		key, err := getKey()
 		exitOnErr(cmd, err)
 
-		cli, err := getSDKClient(key)
+		cli, err := getAPIClient(key)
 		exitOnErr(cmd, err)
 
 		nodeInfo, err := cli.EndpointInfo(context.Background(), globalCallOptions()...)
@@ -80,7 +80,7 @@ var netInfoCmd = &cobra.Command{
 		key, err := getKey()
 		exitOnErr(cmd, err)
 
-		cli, err := getSDKClient(key)
+		cli, err := getAPIClient(key)
 		exitOnErr(cmd, err)
 
 		netInfo, err := cli.NetworkInfo(context.Background(), globalCallOptions()...)

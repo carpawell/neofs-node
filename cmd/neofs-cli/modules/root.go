@@ -15,7 +15,7 @@ import (
 	"github.com/nspcc-dev/neo-go/pkg/crypto/keys"
 	"github.com/nspcc-dev/neo-go/pkg/wallet"
 	"github.com/nspcc-dev/neofs-api-go/pkg"
-	"github.com/nspcc-dev/neofs-api-go/pkg/client"
+	api "github.com/nspcc-dev/neofs-api-go/pkg/client"
 	"github.com/nspcc-dev/neofs-api-go/pkg/owner"
 	"github.com/nspcc-dev/neofs-node/misc"
 	"github.com/nspcc-dev/neofs-node/pkg/network"
@@ -264,24 +264,25 @@ func getEndpointAddress() (addr network.Address, err error) {
 	return
 }
 
-// getSDKClient returns default neofs-api-go sdk client. Consider using
+// getAPIClient returns default neofs-api-go sdk client. Consider using
 // opts... to provide TTL or other global configuration flags.
-func getSDKClient(key *ecdsa.PrivateKey) (client.Client, error) {
+// TODO: delete after `api-go` -> `sdk-go` moving is finished
+func getAPIClient(key *ecdsa.PrivateKey) (api.Client, error) {
 	netAddr, err := getEndpointAddress()
 	if err != nil {
 		return nil, err
 	}
 
-	options := []client.Option{
-		client.WithAddress(netAddr.HostAddr()),
-		client.WithDefaultPrivateKey(key),
+	options := []api.Option{
+		api.WithAddress(netAddr.HostAddr()),
+		api.WithDefaultPrivateKey(key),
 	}
 
 	if netAddr.TLSEnabled() {
-		options = append(options, client.WithTLSConfig(&tls.Config{}))
+		options = append(options, api.WithTLSConfig(&tls.Config{}))
 	}
 
-	c, err := client.New(options...)
+	c, err := api.New(options...)
 
 	return c, err
 }
@@ -330,14 +331,14 @@ func parseXHeaders() []*pkg.XHeader {
 	return xs
 }
 
-func globalCallOptions() []client.CallOption {
+func globalCallOptions() []api.CallOption {
 	xHdrs := parseXHeaders()
 
-	opts := make([]client.CallOption, 0, len(xHdrs)+1) // + TTL
-	opts = append(opts, client.WithTTL(getTTL()))
+	opts := make([]api.CallOption, 0, len(xHdrs)+1) // + TTL
+	opts = append(opts, api.WithTTL(getTTL()))
 
 	for i := range xHdrs {
-		opts = append(opts, client.WithXHeader(xHdrs[i]))
+		opts = append(opts, api.WithXHeader(xHdrs[i]))
 	}
 
 	return opts

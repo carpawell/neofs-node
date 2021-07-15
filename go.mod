@@ -2,6 +2,11 @@ module github.com/nspcc-dev/neofs-node
 
 go 1.16
 
+replace (
+	github.com/nspcc-dev/neofs-api-go => ../neofs-api-go
+	github.com/nspcc-dev/neofs-sdk-go => github.com/carpawell/neofs-sdk-go v0.0.0-20210715175450-e015a7c07ed0
+)
+
 require (
 	github.com/golang/protobuf v1.5.2
 	github.com/google/uuid v1.2.0
@@ -13,7 +18,6 @@ require (
 	github.com/nspcc-dev/hrw v1.0.9
 	github.com/nspcc-dev/neo-go v0.95.3
 	github.com/nspcc-dev/neofs-api-go v1.28.3
-	github.com/nspcc-dev/neofs-sdk-go v0.0.0-20210520210714-9dee13f0d556
 	github.com/nspcc-dev/tzhash v1.4.0
 	github.com/panjf2000/ants/v2 v2.4.0
 	github.com/paulmach/orb v0.2.2

@@ -87,7 +87,7 @@ func healthCheck(cmd *cobra.Command, _ []string) {
 	key, err := getKey()
 	exitOnErr(cmd, err)
 
-	cli, err := getSDKClient(key)
+	cli, err := getAPIClient(key)
 	exitOnErr(cmd, err)
 
 	if healthCheckIRVar {
@@ -168,7 +168,7 @@ func setNetmapStatus(cmd *cobra.Command, _ []string) {
 	err = controlSvc.SignMessage(key, req)
 	exitOnErr(cmd, err)
 
-	cli, err := getSDKClient(key)
+	cli, err := getAPIClient(key)
 	exitOnErr(cmd, err)
 
 	resp, err := control.SetNetmapStatus(cli.Raw(), req)
@@ -225,7 +225,7 @@ var dropObjectsCmd = &cobra.Command{
 		err = controlSvc.SignMessage(key, req)
 		exitOnErr(cmd, err)
 
-		cli, err := getSDKClient(key)
+		cli, err := getAPIClient(key)
 		exitOnErr(cmd, err)
 
 		resp, err := control.DropObjects(cli.Raw(), req)
@@ -259,7 +259,7 @@ var snapshotCmd = &cobra.Command{
 		err = controlSvc.SignMessage(key, req)
 		exitOnErr(cmd, err)
 
-		cli, err := getSDKClient(key)
+		cli, err := getAPIClient(key)
 		exitOnErr(cmd, err)
 
 		resp, err := control.NetmapSnapshot(cli.Raw(), req)

@@ -195,7 +195,7 @@ func init() {
 }
 
 func initSession(ctx context.Context, key *ecdsa.PrivateKey) (client.Client, *session.Token, error) {
-	cli, err := getSDKClient(key)
+	cli, err := getAPIClient(key)
 	if err != nil {
 		return nil, nil, fmt.Errorf("can't create client: %w", err)
 	}
