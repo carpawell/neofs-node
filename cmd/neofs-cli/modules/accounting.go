@@ -5,8 +5,10 @@ import (
 	"fmt"
 	"math"
 
-	"github.com/nspcc-dev/neofs-api-go/pkg/accounting"
 	"github.com/nspcc-dev/neofs-api-go/pkg/owner"
+	accountingsdk "github.com/nspcc-dev/neofs-sdk-go/pkg/api/accounting"
+	sdk "github.com/nspcc-dev/neofs-sdk-go/pkg/api/client"
+	ownersdk "github.com/nspcc-dev/neofs-sdk-go/pkg/api/owner"
 	"github.com/spf13/cobra"
 )
 
@@ -27,8 +29,9 @@ var accountingBalanceCmd = &cobra.Command{
 	Long:  `Get internal balance of NeoFS account`,
 	Run: func(cmd *cobra.Command, args []string) {
 		var (
-			response *accounting.Decimal
-			oid      *owner.ID
+			prm sdk.AccountBalancePrm
+			res sdk.AccountBalanceRes
+			oid *owner.ID
 
 			ctx = context.Background()
 		)
@@ -36,7 +39,7 @@ var accountingBalanceCmd = &cobra.Command{
 		key, err := getKey()
 		exitOnErr(cmd, err)
 
-		cli, err := getSDKClient(key)
+		cli, err := getSDKClient() // new client can not use default private key yet(or it is not planned at all)
 		exitOnErr(cmd, err)
 
 		if balanceOwner == "" {
@@ -49,11 +52,19 @@ var accountingBalanceCmd = &cobra.Command{
 			exitOnErr(cmd, err)
 		}
 
-		response, err = cli.GetBalance(ctx, oid, globalCallOptions()...)
-		exitOnErr(cmd, errf("rpc error: %w", err))
+		var ownerSDK ownersdk.ID // there is no work with wallet in SDK yet(or it is not planned at all)
+		var val [25]byte
+		copy(val[:], oid.ToV2().GetValue())
+		ownerSDK.SetBytes(val)
+
+		prm.SetOwner(ownerSDK)
+		prm.SetECDSAPrivateKey(*key)
+
+		err = cli.AccountBalance(ctx, prm, &res)
+		exitOnErr(cmd, errf("rpc error : %w", err))
 
 		// print to stdout
-		prettyPrintDecimal(cmd, response)
+		prettyPrintDecimal(cmd, res.NumberOfFunds())
 	},
 }
 
@@ -74,11 +85,7 @@ func init() {
 	accountingBalanceCmd.Flags().StringVar(&balanceOwner, "owner", "", "owner of balance account (omit to use owner from private key)")
 }
 
-func prettyPrintDecimal(cmd *cobra.Command, decimal *accounting.Decimal) {
-	if decimal == nil {
-		return
-	}
-
+func prettyPrintDecimal(cmd *cobra.Command, decimal accountingsdk.Decimal) {
 	if verbose {
 		cmd.Println("value:", decimal.Value())
 		cmd.Println("precision:", decimal.Precision())

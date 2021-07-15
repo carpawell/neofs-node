@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/mitchellh/go-homedir"
 	"github.com/nspcc-dev/neo-go/cli/flags"
@@ -19,6 +20,7 @@ import (
 	"github.com/nspcc-dev/neofs-api-go/pkg/owner"
 	"github.com/nspcc-dev/neofs-node/misc"
 	"github.com/nspcc-dev/neofs-node/pkg/network"
+	sdk "github.com/nspcc-dev/neofs-sdk-go/pkg/api/client"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -262,6 +264,34 @@ func getEndpointAddress() (addr network.Address, err error) {
 	}
 
 	return
+}
+
+// getSDKClient returns default neofs-sdk-go client. Consider using
+// opts... to provide TTL or other global configuration flags.
+func getSDKClient() (*sdk.Client, error) {
+	netAddr, err := getEndpointAddress()
+	if err != nil {
+		return nil, err
+	}
+
+	var prm sdk.DialPrm
+	prm.SetAddress(netAddr.HostAddr())
+	prm.SetTimeout(5 * time.Second) // without that there will be `context deadline exceeded`(zero default deadline)
+
+	if netAddr.TLSEnabled() {
+		prm.SetTLSConfig(&tls.Config{})
+	}
+
+	var res sdk.DialRes
+
+	err = prm.Dial(&res)
+	if err != nil {
+		return nil, err
+	}
+
+	cli := res.Client()
+
+	return &cli, nil
 }
 
 // getAPIClient returns default neofs-api-go sdk client. Consider using
