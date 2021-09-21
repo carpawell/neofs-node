@@ -6,6 +6,7 @@ import (
 
 	"github.com/nspcc-dev/neo-go/pkg/core/transaction"
 	"github.com/nspcc-dev/neo-go/pkg/crypto/keys"
+	"github.com/nspcc-dev/neo-go/pkg/rpc/client"
 	"github.com/nspcc-dev/neo-go/pkg/util"
 	"github.com/nspcc-dev/neo-go/pkg/wallet"
 	"github.com/nspcc-dev/neofs-node/pkg/util/logger"
@@ -85,6 +86,35 @@ func New(key *keys.PrivateKey, endpoint string, opts ...Option) (*Client, error)
 			account:   wallet.NewAccountFromPrivateKey(key),
 			endpoints: endpoints,
 			clients:   make(map[string]*Client, len(endpoints)),
+		},
+	}, nil
+}
+
+// NewFromRaw creates Client as New but with single predefined raw neo-go client.
+// Notary support should be enabled with EnableNotarySupport client
+// method separately.
+//
+// WithExtraEndpoints, WithContext and WithDialTimeout options have no effect.
+func NewFromRaw(cli *client.Client, key *keys.PrivateKey, opts ...Option) (*Client, error) {
+	if key == nil {
+		panic("empty private key")
+	}
+
+	// build default configuration
+	cfg := defaultConfig()
+
+	// apply options
+	for _, opt := range opts {
+		opt(cfg)
+	}
+
+	return &Client{
+		singleClient: &singleClient{
+			logger:       cfg.logger,
+			client:       cli,
+			acc:          wallet.NewAccountFromPrivateKey(key),
+			waitInterval: cfg.waitInterval,
+			signer:       cfg.signer,
 		},
 	}, nil
 }
