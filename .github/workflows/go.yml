@@ -50,4 +50,4 @@ jobs:
         with:
           version: v1.50.0
           args: --timeout=5m
-          only-new-issues: true
+          only-new-issues: ${{ github.ref != 'refs/heads/master' }}
